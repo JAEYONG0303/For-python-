@@ -1,0 +1,7 @@
+[user]
+	name = kwonjy
+	email = rnjswodyd1@gmail.com
+[core]
+	autocrlf = true
+	quotepath = false
+	ignorecase = false
