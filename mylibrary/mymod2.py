@@ -1,7 +1,7 @@
 # 간단한 클래스 정의하기
 class Member:
     def __init__(self, username, email):
-        print("----------생성자가 실행되었습니다,. ------------")
+        print("----------생성자가 실행되었습니다. ------------")
         self.username =username
         self.email =email
 
