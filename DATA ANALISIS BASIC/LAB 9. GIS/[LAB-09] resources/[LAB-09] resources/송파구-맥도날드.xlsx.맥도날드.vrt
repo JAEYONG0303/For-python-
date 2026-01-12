@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OGRVRTDataSource>
+    <OGRVRTLayer name="송파구-맥도날드-맥도날드">
+        <SrcDataSource relativeToVRT="1">송파구-맥도날드.xlsx</SrcDataSource>
+        <!--Header=False-->
+        <SrcLayer>맥도날드</SrcLayer>
+        <Field name="NAME" src="NAME" type="String"/>
+        <Field name="ADDR" src="ADDR" type="String"/>
+        <GeometryType>wkbPoint</GeometryType>
+        <LayerSRS>EPSG:4326</LayerSRS>
+        <GeometryField encoding="PointFromColumns" x="X" y="Y"/>
+    </OGRVRTLayer>
+</OGRVRTDataSource>
