@@ -41733,3 +41733,201 @@ Name: log_ltc, dtype: float32
                          0.77]), plot=summary, feature=None, observation=None, use_train_data=True, X_new_sample=None, y_new_sample=None, save=False, kwargs={})
 2026-03-13 17:54:31,122:INFO:Checking exceptions
 2026-03-13 17:54:31,122:INFO:Soft dependency imported: shap: 0.49.1
+2026-03-16 18:15:32,326:INFO:PyCaret RegressionExperiment
+2026-03-16 18:15:32,327:INFO:Logging name: reg-default-name
+2026-03-16 18:15:32,327:INFO:ML Usecase: MLUsecase.REGRESSION
+2026-03-16 18:15:32,327:INFO:version 3.3.2
+2026-03-16 18:15:32,327:INFO:Initializing setup()
+2026-03-16 18:15:32,327:INFO:self.USI: e603
+2026-03-16 18:15:32,327:INFO:self._variable_keys: {'exp_id', 'memory', 'html_param', 'seed', 'n_jobs_param', '_available_plots', 'fold_groups_param', 'fold_generator', 'X_train', 'gpu_n_jobs_param', 'exp_name_log', 'target_param', '_ml_usecase', 'y', 'transform_target_param', 'pipeline', 'data', 'gpu_param', 'X', 'fold_shuffle_param', 'X_test', 'idx', 'logging_param', 'USI', 'log_plots_param', 'y_train', 'y_test'}
+2026-03-16 18:15:32,327:INFO:Checking environment
+2026-03-16 18:15:32,327:INFO:python_version: 3.11.9
+2026-03-16 18:15:32,327:INFO:python_build: ('tags/v3.11.9:de54cf5', 'Apr  2 2024 10:12:12')
+2026-03-16 18:15:32,327:INFO:machine: AMD64
+2026-03-16 18:15:32,328:INFO:platform: Windows-10-10.0.26100-SP0
+2026-03-16 18:15:32,330:INFO:Memory: svmem(total=16509030400, available=2071986176, percent=87.4, used=14437044224, free=2071986176)
+2026-03-16 18:15:32,331:INFO:Physical Core: 14
+2026-03-16 18:15:32,331:INFO:Logical Core: 14
+2026-03-16 18:15:32,331:INFO:Checking libraries
+2026-03-16 18:15:32,332:INFO:System:
+2026-03-16 18:15:32,332:INFO:    python: 3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]
+2026-03-16 18:15:32,332:INFO:executable: c:\Users\wodyd\AppData\Local\Programs\Python\Python311\python.exe
+2026-03-16 18:15:32,332:INFO:   machine: Windows-10-10.0.26100-SP0
+2026-03-16 18:15:32,332:INFO:PyCaret required dependencies:
+2026-03-16 18:15:32,333:INFO:                 pip: 26.0.1
+2026-03-16 18:15:32,333:INFO:          setuptools: 82.0.0
+2026-03-16 18:15:32,333:INFO:             pycaret: 3.3.2
+2026-03-16 18:15:32,333:INFO:             IPython: 9.10.0
+2026-03-16 18:15:32,333:INFO:          ipywidgets: 8.1.8
+2026-03-16 18:15:32,333:INFO:                tqdm: 4.67.3
+2026-03-16 18:15:32,333:INFO:               numpy: 1.26.4
+2026-03-16 18:15:32,333:INFO:              pandas: 2.3.3
+2026-03-16 18:15:32,333:INFO:              jinja2: 3.1.6
+2026-03-16 18:15:32,333:INFO:               scipy: 1.11.4
+2026-03-16 18:15:32,333:INFO:              joblib: 1.3.2
+2026-03-16 18:15:32,334:INFO:             sklearn: 1.4.2
+2026-03-16 18:15:32,334:INFO:                pyod: 2.0.6
+2026-03-16 18:15:32,334:INFO:            imblearn: 0.13.0
+2026-03-16 18:15:32,334:INFO:   category_encoders: 2.7.0
+2026-03-16 18:15:32,334:INFO:            lightgbm: 4.6.0
+2026-03-16 18:15:32,334:INFO:               numba: 0.64.0
+2026-03-16 18:15:32,334:INFO:            requests: 2.32.5
+2026-03-16 18:15:32,334:INFO:          matplotlib: 3.7.5
+2026-03-16 18:15:32,334:INFO:          scikitplot: 0.3.7
+2026-03-16 18:15:32,334:INFO:         yellowbrick: 1.5
+2026-03-16 18:15:32,334:INFO:              plotly: 6.5.2
+2026-03-16 18:15:32,334:INFO:    plotly-resampler: Not installed
+2026-03-16 18:15:32,334:INFO:             kaleido: 1.2.0
+2026-03-16 18:15:32,334:INFO:           schemdraw: 0.15
+2026-03-16 18:15:32,334:INFO:         statsmodels: 0.14.6
+2026-03-16 18:15:32,334:INFO:              sktime: 0.26.0
+2026-03-16 18:15:32,334:INFO:               tbats: 1.1.3
+2026-03-16 18:15:32,334:INFO:            pmdarima: 2.0.4
+2026-03-16 18:15:32,334:INFO:              psutil: 7.2.2
+2026-03-16 18:15:32,334:INFO:          markupsafe: 3.0.3
+2026-03-16 18:15:32,334:INFO:             pickle5: Not installed
+2026-03-16 18:15:32,334:INFO:         cloudpickle: 3.1.2
+2026-03-16 18:15:32,335:INFO:         deprecation: 2.1.0
+2026-03-16 18:15:32,335:INFO:              xxhash: 3.6.0
+2026-03-16 18:15:32,335:INFO:           wurlitzer: Not installed
+2026-03-16 18:15:32,335:INFO:PyCaret optional dependencies:
+2026-03-16 18:15:32,335:INFO:                shap: 0.49.1
+2026-03-16 18:15:32,335:INFO:           interpret: Not installed
+2026-03-16 18:15:32,335:INFO:                umap: Not installed
+2026-03-16 18:15:32,335:INFO:     ydata_profiling: Not installed
+2026-03-16 18:15:32,335:INFO:  explainerdashboard: Not installed
+2026-03-16 18:15:32,335:INFO:             autoviz: Not installed
+2026-03-16 18:15:32,335:INFO:           fairlearn: Not installed
+2026-03-16 18:15:32,335:INFO:          deepchecks: Not installed
+2026-03-16 18:15:32,335:INFO:             xgboost: 2.1.4
+2026-03-16 18:15:32,335:INFO:            catboost: 1.2.8
+2026-03-16 18:15:32,335:INFO:              kmodes: 0.12.2
+2026-03-16 18:15:32,335:INFO:             mlxtend: Not installed
+2026-03-16 18:15:32,335:INFO:       statsforecast: Not installed
+2026-03-16 18:15:32,335:INFO:        tune_sklearn: Not installed
+2026-03-16 18:15:32,335:INFO:                 ray: Not installed
+2026-03-16 18:15:32,335:INFO:            hyperopt: Not installed
+2026-03-16 18:15:32,335:INFO:              optuna: Not installed
+2026-03-16 18:15:32,335:INFO:               skopt: Not installed
+2026-03-16 18:15:32,335:INFO:              mlflow: Not installed
+2026-03-16 18:15:32,335:INFO:              gradio: Not installed
+2026-03-16 18:15:32,335:INFO:             fastapi: Not installed
+2026-03-16 18:15:32,335:INFO:             uvicorn: Not installed
+2026-03-16 18:15:32,335:INFO:              m2cgen: Not installed
+2026-03-16 18:15:32,335:INFO:           evidently: Not installed
+2026-03-16 18:15:32,335:INFO:               fugue: Not installed
+2026-03-16 18:15:32,335:INFO:           streamlit: Not installed
+2026-03-16 18:15:32,335:INFO:             prophet: 1.3.0
+2026-03-16 18:15:32,335:INFO:None
+2026-03-16 18:15:32,336:INFO:Set up data.
+2026-03-16 18:15:32,343:INFO:Set up folding strategy.
+2026-03-16 18:15:32,345:INFO:Set up train/test split.
+2026-03-16 18:15:32,355:INFO:Set up index.
+2026-03-16 18:15:32,356:INFO:Assigning column types.
+2026-03-16 18:15:32,359:INFO:Engine successfully changes for model 'lr' to 'sklearn'.
+2026-03-16 18:15:32,360:INFO:Engine for model 'lasso' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,362:INFO:Engine for model 'ridge' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,368:INFO:Engine for model 'en' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,405:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,429:INFO:Engine for model 'knn' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,430:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:32,432:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:32,432:INFO:Engine for model 'lasso' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,435:INFO:Engine for model 'ridge' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,437:INFO:Engine for model 'en' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,472:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,494:INFO:Engine for model 'knn' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,495:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:32,496:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:32,496:INFO:Engine successfully changes for model 'lasso' to 'sklearn'.
+2026-03-16 18:15:32,499:INFO:Engine for model 'ridge' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,505:INFO:Engine for model 'en' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,536:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,557:INFO:Engine for model 'knn' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,560:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:32,561:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:32,562:INFO:Engine for model 'ridge' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,566:INFO:Engine for model 'en' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,592:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,613:INFO:Engine for model 'knn' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,614:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:32,615:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:32,615:INFO:Engine successfully changes for model 'ridge' to 'sklearn'.
+2026-03-16 18:15:32,620:INFO:Engine for model 'en' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,646:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,670:INFO:Engine for model 'knn' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,670:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:32,672:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:32,677:INFO:Engine for model 'en' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,723:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,747:INFO:Engine for model 'knn' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,748:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:32,749:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:32,750:INFO:Engine successfully changes for model 'en' to 'sklearn'.
+2026-03-16 18:15:32,785:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,813:INFO:Engine for model 'knn' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,814:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:32,816:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:32,864:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,894:INFO:Engine for model 'knn' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,895:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:32,897:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:32,897:INFO:Engine successfully changes for model 'knn' to 'sklearn'.
+2026-03-16 18:15:32,937:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:32,968:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:32,971:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:33,022:INFO:Engine for model 'svm' has not been set explicitly, hence returning None.
+2026-03-16 18:15:33,046:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:33,048:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:33,048:INFO:Engine successfully changes for model 'svm' to 'sklearn'.
+2026-03-16 18:15:33,123:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:33,125:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:33,196:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:33,198:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:33,211:INFO:Preparing preprocessing pipeline...
+2026-03-16 18:15:33,211:INFO:Set up simple imputation.
+2026-03-16 18:15:33,211:INFO:Set up feature normalization.
+2026-03-16 18:15:33,353:INFO:Finished creating preprocessing pipeline.
+2026-03-16 18:15:33,364:INFO:Pipeline: Pipeline(memory=FastMemory(location=C:\Users\Public\Documents\ESTsoft\CreatorTemp\joblib),
+         steps=[('numerical_imputer',
+                 TransformerWrapper(include=['year', 'aging_rate', 'total_pop',
+                                             'cpi', 'post_2017',
+                                             'facility_count',
+                                             'facility_density', 'log_grdp',
+                                             'aging_post', 'aging_over14',
+                                             'over14_dummy'],
+                                    transformer=SimpleImputer())),
+                ('categorical_imputer',
+                 TransformerWrapper(include=[],
+                                    transformer=SimpleImputer(strategy='most_frequent'))),
+                ('normalize',
+                 TransformerWrapper(transformer=StandardScaler()))])
+2026-03-16 18:15:33,364:INFO:Creating final display dataframe.
+2026-03-16 18:15:33,508:INFO:Setup _display_container:                     Description             Value
+0                    Session id                52
+1                        Target           log_ltc
+2                   Target type        Regression
+3           Original data shape         (252, 15)
+4        Transformed data shape         (252, 12)
+5   Transformed train set shape         (189, 12)
+6    Transformed test set shape          (63, 12)
+7               Ignore features                 3
+8              Numeric features                11
+9                    Preprocess              True
+10              Imputation type            simple
+11           Numeric imputation              mean
+12       Categorical imputation              mode
+13                    Normalize              True
+14             Normalize method            zscore
+15               Fold Generator   TimeSeriesSplit
+16                  Fold Number                 5
+17                     CPU Jobs                -1
+18                      Use GPU             False
+19               Log Experiment             False
+20              Experiment Name  reg-default-name
+21                          USI              e603
+2026-03-16 18:15:33,588:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:33,591:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:33,669:INFO:Soft dependency imported: xgboost: 2.1.4
+2026-03-16 18:15:33,673:INFO:Soft dependency imported: catboost: 1.2.8
+2026-03-16 18:15:33,675:INFO:setup() successfully completed in 1.36s...............
