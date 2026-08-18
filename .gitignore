@@ -1,0 +1,30 @@
+# ---------------------------------------------------------
+# 학원수업 저장소 .gitignore
+# ---------------------------------------------------------
+
+# 파이썬 캐시 / 가상환경
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# 모델 학습 중 자동 생성되는 로그
+catboost_info/
+lightgbm_info/
+mlruns/
+*.log
+
+# 노트북 체크포인트
+.ipynb_checkpoints/
+
+# OS / 에디터 임시 파일
+Thumbs.db
+desktop.ini
+.DS_Store
+*.tmp
+*.bak
+
+# 개인 키 (공개키만 두더라도 저장소에는 올리지 않는다)
+id_*
+!id_*.pub
