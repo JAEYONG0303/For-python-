@@ -12,6 +12,13 @@
         pwsh -File "tools\daily-commit.ps1"           # 커밋 + push
         pwsh -File "tools\daily-commit.ps1" -DryRun   # 무엇을 할지 보기만
         pwsh -File "tools\daily-commit.ps1" -NoPush   # 커밋만 하고 push 안 함
+
+    ※ 한글 처리 주의
+      Windows PowerShell 5.1 은 외부 프로그램에 넘기는 인자를 UTF-8 이 아닌
+      시스템 코드페이지(cp949)로 바꾼다. 그래서 이 스크립트는
+        - git 에 한글 경로를 인자로 넘기지 않고  (-C 대신 Push-Location)
+        - 한글 커밋 메시지도 인자가 아니라 파일로 넘긴다  (-m 대신 -F)
+      두 가지를 지킨다. 이걸 바꾸면 한글이 깨진다.
 #>
 
 param(
@@ -21,6 +28,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# git 이 UTF-8 로 내보내는 파일 이름을 그대로 읽기 위해 콘솔 입출력을 UTF-8 로 맞춘다.
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 # --- git 실행 파일 찾기 ---------------------------------------------------
 # 작업 스케줄러는 PATH 가 평소와 다를 수 있어서, 없으면 기본 설치 경로를 쓴다.
@@ -40,13 +50,14 @@ function Write-Log {
 }
 
 
-# git 을 저장소 안에서 실행한다.
-#   -C          : 어느 폴더에서 실행하든 저장소를 정확히 가리키게 한다
-#   quotepath   : 한글 파일명이 \355\225\234 처럼 깨져 나오는 것을 막는다
-# stderr(줄바꿈 경고 등)는 표준 출력과 섞이지 않도록 따로 버린다.
+# git 을 현재 위치(= 저장소 안)에서 실행한다.
 # param 블록을 두지 않아야 -A, -m 같은 git 옵션을 PowerShell 이 가로채지 않는다.
 function Invoke-Git {
-    & $git -C $RepoPath -c core.quotepath=false @args 2>$null
+    # git 은 "LF will be replaced by CRLF" 같은 안내도 stderr 로 보낸다.
+    # 이걸 오류로 취급하면 스크립트가 멈추므로 이 함수 안에서만 Stop 을 푼다.
+    $ErrorActionPreference = "Continue"
+
+    & $git -c core.quotepath=false @args 2>$null
 }
 
 
@@ -55,8 +66,11 @@ try {
         throw "git 저장소가 아닙니다: $RepoPath"
     }
 
+    Push-Location $RepoPath
+
     # 1) 변경분을 모두 스테이징한다 (.gitignore 에 걸린 파일은 자동 제외)
     Invoke-Git add -A | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "git add 실패 (exit $LASTEXITCODE)" }
 
     # 2) 스테이징된 것이 없으면 오늘은 할 일이 없다
     #    출력 형식은 "M<탭>파일경로" 이므로 그 형태인 줄만 골라 쓴다.
@@ -77,7 +91,8 @@ try {
         $kind = $label[$code.Substring(0, 1)]
         if (-not $kind) { $kind = $code }
 
-        $files += [pscustomobject]@{ Kind = $kind; Path = $path }
+        # 공백이 든 파일 이름은 git 이 따옴표로 감싸 주므로 벗겨낸다
+        $files += [pscustomobject]@{ Kind = $kind; Path = $path.Trim('"') }
     }
 
     # 4) 커밋 메시지를 만든다
@@ -86,8 +101,15 @@ try {
     $today = Get-Date -Format "yyyy-MM-dd"
 
     # 제목에는 그날의 대표 파일을 쓴다. 노트북이 있으면 노트북을 우선한다.
-    $main = $files | Where-Object { $_.Path -like "*.ipynb" } | Select-Object -First 1
-    if (-not $main) { $main = $files[0] }
+    $notebook = $files | Where-Object { $_.Path -like "*.ipynb" } | Select-Object -First 1
+
+    if ($notebook) {
+        $main  = $notebook
+        $topic = "수업 정리"
+    } else {
+        $main  = $files[0]
+        $topic = "저장소 정리"      # 노트북이 아니라 설정, 문서 등만 바뀐 날
+    }
 
     $head = [System.IO.Path]::GetFileNameWithoutExtension($main.Path)
     if (-not $head) { $head = Split-Path $main.Path -Leaf }   # .gitignore 처럼 이름이 없는 파일
@@ -95,33 +117,37 @@ try {
     $rest = $files.Count - 1
 
     if ($rest -gt 0) {
-        $subject = "$today 수업 정리: $head 외 ${rest}건"
+        $subject = "$today ${topic}: $head 외 ${rest}건"
     } else {
-        $subject = "$today 수업 정리: $head"
+        $subject = "$today ${topic}: $head"
     }
 
-    $list = ($files | ForEach-Object { "- [$($_.Kind)] $($_.Path)" }) -join "`n"
-    $body = "변경 파일 $($files.Count)개`n`n$list"
+    $list    = ($files | ForEach-Object { "- [$($_.Kind)] $($_.Path)" }) -join "`n"
+    $message = "$subject`n`n변경 파일 $($files.Count)개`n`n$list`n"
 
     # 5) -DryRun 이면 스테이징을 되돌리고 내용만 보여준다
     if ($DryRun) {
         Write-Log "[DryRun] 아래 내용으로 커밋할 예정입니다."
         Write-Host ""
-        Write-Host $subject
-        Write-Host ""
-        Write-Host $body
-        Write-Host ""
+        Write-Host $message
 
         Invoke-Git reset | Out-Null
         return
     }
 
     # 6) 커밋
-    Invoke-Git commit -m $subject -m $body | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Log "커밋 실패 (exit $LASTEXITCODE)"
-        exit 1
+    #    한글이 깨지지 않도록 메시지를 UTF-8 파일(BOM 없음)로 써서 -F 로 넘긴다.
+    $msgFile = [System.IO.Path]::GetTempFileName()
+    [System.IO.File]::WriteAllText($msgFile, $message, (New-Object System.Text.UTF8Encoding $false))
+
+    try {
+        Invoke-Git commit -F $msgFile | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "git commit 실패 (exit $LASTEXITCODE)" }
     }
+    finally {
+        Remove-Item $msgFile -Force -ErrorAction SilentlyContinue
+    }
+
     Write-Log "커밋 완료 - $subject"
 
     # 7) push
@@ -132,12 +158,15 @@ try {
 
     Invoke-Git push origin HEAD | Out-Null
     if ($LASTEXITCODE -ne 0) {
-        Write-Log "push 실패 (exit $LASTEXITCODE) - 인터넷 연결이나 SSH 키를 확인하세요."
-        exit 1
+        throw "git push 실패 (exit $LASTEXITCODE) - 인터넷 연결이나 SSH 키를 확인하세요."
     }
+
     Write-Log "push 완료 - origin/main"
 }
 catch {
     Write-Log "오류 - $($_.Exception.Message)"
     exit 1
+}
+finally {
+    Pop-Location -ErrorAction SilentlyContinue
 }
