@@ -47,9 +47,27 @@
 
 | 파일 | 역할 |
 |---|---|
-| `tools/daily-commit.ps1` | 변경분을 모아 커밋 메시지를 만들고 push |
+| `tools/daily-commit.ps1` | 노트북 정리 → 변경분 스테이징 → 커밋 메시지 생성 → push |
+| `tools/tidy_notebooks.py` | 노트북을 하루 3개씩 일관된 형식으로 정리 |
 | `tools/register-task.ps1` | 위 스크립트를 Windows 작업 스케줄러에 등록 |
+| `tools/tidy-state.json` | 어디까지 정리했는지 기록 |
 | `tools/daily-commit.log` | 실행 기록 (커밋 안 됨) |
+
+### 노트북 형식 정리
+
+커밋 하나가 너무 커지지 않도록 **하루 3개씩** 수업 순서대로 정리합니다.
+
+**하는 것** — nbformat 4.5 통일, kernelspec / language_info 통일, 셀 id 부여,
+맨 끝 빈 셀 제거, 줄 끝 공백 제거, 3줄 이상 이어진 빈 줄을 2줄로.
+
+**하지 않는 것** — 저장된 **출력(그래프·표·print 결과)은 지우지 않습니다.**
+`execution_count`도 그대로 두고, 코드나 주석 내용은 고쳐 쓰지 않습니다.
+
+```powershell
+python tools\tidy_notebooks.py --status    # 진행 현황
+python tools\tidy_notebooks.py --dry-run   # 무엇이 바뀔지 미리보기
+python tools\tidy_notebooks.py --count 10  # 한 번에 10개
+```
 
 ### 직접 실행
 

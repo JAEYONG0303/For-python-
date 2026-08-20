@@ -23,7 +23,9 @@
 
 param(
     [string]$RepoPath = "C:\Users\wodyd\Desktop\학원수업",
+    [int]$TidyCount = 3,
     [switch]$NoPush,
+    [switch]$NoTidy,
     [switch]$DryRun
 )
 
@@ -82,6 +84,28 @@ try {
         return
     }
 
+    # 0-2) 노트북을 하루에 몇 개씩만 일관된 형식으로 정리한다.
+    #      한꺼번에 115개를 바꾸면 커밋 하나가 너무 커지므로 조금씩 나눠 올린다.
+    #      규칙과 예외는 tools/tidy_notebooks.py 주석 참고. 출력은 건드리지 않는다.
+    if (-not $NoTidy) {
+        $py = (Get-Command python -ErrorAction SilentlyContinue).Source
+        if (-not $py) { $py = Join-Path $env:LOCALAPPDATA "Programs\Python\Python311\python.exe" }
+
+        if (Test-Path $py) {
+            # 한글 경로를 인자로 넘기지 않으려고 상대 경로를 쓴다 (이미 저장소 안에 있음)
+            $env:PYTHONIOENCODING = "utf-8"
+            $dry = if ($DryRun) { "--dry-run" } else { $null }
+
+            $out = & $py "tools\tidy_notebooks.py" --count $TidyCount $dry 2>&1
+            foreach ($line in $out) {
+                if ("$line".Trim()) { Write-Log "  $line" }
+            }
+        }
+        else {
+            Write-Log "python 을 찾을 수 없어 노트북 정리를 건너뜁니다."
+        }
+    }
+
     # 1) 변경분을 모두 스테이징한다 (.gitignore 에 걸린 파일은 자동 제외)
     Invoke-Git add -A | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "git add 실패 (exit $LASTEXITCODE)" }
@@ -100,13 +124,23 @@ try {
     $files = @()
 
     foreach ($line in $status) {
-        $code, $path = $line -split "`t", 2
+        # 보통은 "M<탭>경로" 인데, 이름 변경만 "R100<탭>이전<탭>이후" 로 필드가 3개다.
+        # 공백이 든 파일 이름은 git 이 따옴표로 감싸 주므로 벗겨낸다.
+        $parts = ($line -split "`t") | ForEach-Object { $_.Trim('"') }
+        $code  = $parts[0]
 
         $kind = $label[$code.Substring(0, 1)]
         if (-not $kind) { $kind = $code }
 
-        # 공백이 든 파일 이름은 git 이 따옴표로 감싸 주므로 벗겨낸다
-        $files += [pscustomobject]@{ Kind = $kind; Path = $path.Trim('"') }
+        if ($code.StartsWith("R") -and $parts.Count -ge 3) {
+            $path    = $parts[2]
+            $display = "$($parts[1]) → $($parts[2])"
+        } else {
+            $path    = $parts[1]
+            $display = $parts[1]
+        }
+
+        $files += [pscustomobject]@{ Kind = $kind; Path = $path; Display = $display }
     }
 
     # 4) 커밋 메시지를 만든다
@@ -115,9 +149,12 @@ try {
     # 제목에는 그날의 대표 파일을 쓴다. 노트북이 있으면 노트북을 우선한다.
     $notebook = $files | Where-Object { $_.Path -like "*.ipynb" } | Select-Object -First 1
 
+    # tidy-state.json 이 바뀌었다면 그날 노트북 형식 정리가 돌았다는 뜻이다.
+    $tidied = $files | Where-Object { $_.Path -like "*tidy-state.json" }
+
     if ($notebook) {
         $main  = $notebook
-        $topic = "수업 정리"
+        $topic = if ($tidied) { "노트북 형식 정리" } else { "수업 정리" }
     } else {
         $main  = $files[0]
         $topic = "저장소 정리"      # 노트북이 아니라 설정, 문서 등만 바뀐 날
@@ -134,7 +171,7 @@ try {
         $subject = "$today ${topic}: $head"
     }
 
-    $list    = ($files | ForEach-Object { "- [$($_.Kind)] $($_.Path)" }) -join "`n"
+    $list    = ($files | ForEach-Object { "- [$($_.Kind)] $($_.Display)" }) -join "`n"
     $message = "$subject`n`n변경 파일 $($files.Count)개`n`n$list`n"
 
     # 5) -DryRun 이면 스테이징을 되돌리고 내용만 보여준다
