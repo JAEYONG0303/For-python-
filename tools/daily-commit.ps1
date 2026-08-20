@@ -68,6 +68,20 @@ try {
 
     Push-Location $RepoPath
 
+    $today = Get-Date -Format "yyyy-MM-dd"
+
+    # 0) 하루에 한 번만 커밋한다.
+    #    트리거가 두 개(매일 22시 / 로그온 5분 뒤)라 하루에 여러 번 실행될 수 있는데,
+    #    커밋은 공개 저장소에 영구히 남으므로 오늘 이미 커밋했으면 그냥 끝낸다.
+    #    직접 손으로 커밋한 날도 마찬가지로 건너뛴다.
+    #    -DryRun 은 커밋을 만들지 않으므로 이 가드를 건너뛰고 내용만 보여준다.
+    $lastDate = Invoke-Git log -1 --format=%ad --date=format:%Y-%m-%d
+
+    if ($lastDate -eq $today -and -not $DryRun) {
+        Write-Log "오늘($today) 이미 커밋이 있어 건너뜁니다."
+        return
+    }
+
     # 1) 변경분을 모두 스테이징한다 (.gitignore 에 걸린 파일은 자동 제외)
     Invoke-Git add -A | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "git add 실패 (exit $LASTEXITCODE)" }
@@ -98,8 +112,6 @@ try {
     # 4) 커밋 메시지를 만든다
     #    제목 : 2026-08-18 수업 정리: LAB 3. 파이썬 외 2건
     #    본문 : 바뀐 파일 목록
-    $today = Get-Date -Format "yyyy-MM-dd"
-
     # 제목에는 그날의 대표 파일을 쓴다. 노트북이 있으면 노트북을 우선한다.
     $notebook = $files | Where-Object { $_.Path -like "*.ipynb" } | Select-Object -First 1
 
