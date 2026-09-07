@@ -18,11 +18,14 @@ def sendMail(from_addr, to_addr, subject, content, files=[]):
     # 컨텐츠 형식(plain or html)
     content_type = 'plain'
 
-# 로그인 계정 이름
-    user_name = "rnjswodyd1@gmail.com"
+    # 로그인 계정 이름 / 비밀번호 - 환경변수에서 읽음
+    user_name = os.environ.get("GMAIL_USER")
+    password = os.environ.get("GMAIL_APP_PASSWORD")
 
-# 비밀번호
-    password = "scah sksp vcti pfbz "
+    if not user_name or not password:
+        raise RuntimeError(
+            "GMAIL_USER / GMAIL_APP_PASSWORD 환경변수가 없습니다. .env 파일을 확인하세요."
+        )
 
 # 구글 발송 서버 주소와 포트
     smtp = "smtp.gmail.com"
