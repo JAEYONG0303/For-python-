@@ -70,6 +70,19 @@ try {
 
     Push-Location $RepoPath
 
+    # 전송 재시도는 하루 1회 커밋 제한과 별도로 수행한다.
+    if (-not $DryRun -and -not $NoPush) {
+        Invoke-Git fetch origin | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "원격 확인 실패; 작업을 중단합니다." }
+        $pending = Invoke-Git rev-list --count 'origin/main..HEAD'
+        if ($LASTEXITCODE -ne 0) { throw "미전송 커밋 확인 실패" }
+        if ([int]$pending -gt 0) {
+            Invoke-Git push origin HEAD | Out-Null
+            if ($LASTEXITCODE -ne 0) { throw "미전송 커밋 push 실패; 다음 실행에 재시도합니다." }
+            Write-Log "미전송 커밋 push 완료"
+        }
+    }
+
     $today = Get-Date -Format "yyyy-MM-dd"
 
     # 0) 하루에 한 번만 커밋한다.
@@ -78,6 +91,7 @@ try {
     #    직접 손으로 커밋한 날도 마찬가지로 건너뛴다.
     #    -DryRun 은 커밋을 만들지 않으므로 이 가드를 건너뛰고 내용만 보여준다.
     $lastDate = Invoke-Git log -1 --format=%ad --date=format:%Y-%m-%d
+    if ($LASTEXITCODE -ne 0) { throw "최근 커밋 조회 실패" }
 
     if ($lastDate -eq $today -and -not $DryRun) {
         Write-Log "오늘($today) 이미 커밋이 있어 건너뜁니다."
@@ -88,8 +102,8 @@ try {
     #      한꺼번에 115개를 바꾸면 커밋 하나가 너무 커지므로 조금씩 나눠 올린다.
     #      규칙과 예외는 tools/tidy_notebooks.py 주석 참고. 출력은 건드리지 않는다.
     if (-not $NoTidy) {
-        $py = (Get-Command python -ErrorAction SilentlyContinue).Source
-        if (-not $py) { $py = Join-Path $env:LOCALAPPDATA "Programs\Python\Python311\python.exe" }
+        $py = Join-Path $env:LOCALAPPDATA "Programs\Python\Python311\python.exe"
+        if (-not (Test-Path $py)) { $py = (Get-Command python -ErrorAction SilentlyContinue).Source }
 
         if (Test-Path $py) {
             # 한글 경로를 인자로 넘기지 않으려고 상대 경로를 쓴다 (이미 저장소 안에 있음)
@@ -97,13 +111,23 @@ try {
             $dry = if ($DryRun) { "--dry-run" } else { $null }
 
             $out = & $py "tools\tidy_notebooks.py" --count $TidyCount $dry 2>&1
+            $tidyExit = $LASTEXITCODE
             foreach ($line in $out) {
                 if ("$line".Trim()) { Write-Log "  $line" }
             }
+            if ($tidyExit -ne 0) { throw "노트북 정리 실패; 커밋하지 않습니다. 변경 파일은 점검을 위해 보존합니다." }
         }
         else {
-            Write-Log "python 을 찾을 수 없어 노트북 정리를 건너뜁니다."
+            throw "python 을 찾을 수 없어 작업을 중단합니다."
         }
+    }
+
+    # 미리보기에서는 인덱스에 손대지 않는다.
+    if ($DryRun) {
+        Invoke-Git status --short
+        if ($LASTEXITCODE -ne 0) { throw "변경 목록 조회 실패" }
+        Write-Log "[DryRun] 정리 예정 및 현재 변경 목록입니다. 스테이징/커밋/push는 실행하지 않았습니다."
+        return
     }
 
     # 1) 변경분을 모두 스테이징한다 (.gitignore 에 걸린 파일은 자동 제외)

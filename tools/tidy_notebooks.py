@@ -93,8 +93,8 @@ def load_state():
     if os.path.exists(STATE_FILE):
         try:
             return json.load(io.open(STATE_FILE, encoding="utf-8"))
-        except Exception:
-            pass
+        except Exception as exc:
+            raise RuntimeError("진행 기록을 읽을 수 없어 정리를 중단합니다") from exc
     return {"done": []}
 
 
@@ -146,20 +146,25 @@ def tidy(rel, dry_run=False):
 
     md = nb.setdefault("metadata", {})
 
-    # 2) kernelspec
-    if md.get("kernelspec") != KERNELSPEC:
+    # 실행 환경 기록은 추측해서 덮어쓰지 않는다.
+    if not md.get("kernelspec"):
         changes.append("kernelspec 통일")
         md["kernelspec"] = dict(KERNELSPEC)
 
     # 3) language_info
     old_ver = md.get("language_info", {}).get("version")
-    if md.get("language_info") != LANGUAGE_INFO:
+    if not md.get("language_info"):
         changes.append("language_info 통일 (%s → %s)" % (old_ver or "없음", LANGUAGE_INFO["version"]))
-        md["language_info"] = dict(LANGUAGE_INFO)
+        md["language_info"] = {"name": "python"}
 
     # 4) 맨 끝 빈 셀 제거
     removed = 0
-    while len(nb.cells) > 1 and not "".join(nb.cells[-1].get("source", "")).strip():
+    while (len(nb.cells) > 1
+           and not nb.cells[-1].get("source", "")
+           and not nb.cells[-1].get("outputs")
+           and not nb.cells[-1].get("attachments")
+           and not nb.cells[-1].get("metadata")
+           and nb.cells[-1].get("execution_count") is None):
         nb.cells.pop()
         removed += 1
     if removed:
@@ -175,7 +180,7 @@ def tidy(rel, dry_run=False):
         src = c.get("source", "")
         if isinstance(src, list):
             src = "".join(src)
-        new_src = clean_source(src)
+        new_src = src  # 코드 문자열과 Markdown 줄바꿈을 포함해 원문 그대로 보존
         if new_src != src:
             c["source"] = new_src
             src_cleaned += 1
@@ -185,6 +190,7 @@ def tidy(rel, dry_run=False):
     if src_cleaned:
         changes.append("셀 %d개 공백 정리" % src_cleaned)
 
+    nbformat.validate(nb)
     if changes and not dry_run:
         with io.open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(nbformat.writes(nb))
@@ -225,11 +231,13 @@ def main():
     print("노트북 정리 %d개 (남은 %d개)%s" % (len(batch), len(todo), "  [미리보기]" if args.dry_run else ""))
 
     touched = 0
+    failed = 0
     for rel in batch:
         try:
             changes = tidy(rel, dry_run=args.dry_run)
         except Exception as e:
             print("  [실패] %s -> %s" % (rel, e))
+            failed += 1
             continue
 
         if changes:
@@ -246,7 +254,9 @@ def main():
     if not args.dry_run:
         save_state(state)
 
-    print("바뀐 파일 %d개 / 남은 노트북 %d개" % (touched, len(todo) - len(batch)))
+    print("바뀐 파일 %d개 / 남은 노트북 %d개" % (touched, len(todo) - len(batch) + failed))
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
