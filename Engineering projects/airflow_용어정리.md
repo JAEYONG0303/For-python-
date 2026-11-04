@@ -129,3 +129,61 @@
     - Airflow의 모든 DAG에서 공통으로 사용할 수 있는 전역 변수 저장소
     - Key-Value 형태로 저장하며 WEB UI에서 관리 가능
     - Airflow UI -> Admin -> Variables -> Add Variable(+) -> 전역 변수값 입력
+
+
+- **Airflow Architecture**
+    - dags: dag 스크립트들이 저장 폴더
+    - logs: dag 파싱 및 파이프라인 로그 저장 폴더
+    - config: 설정파일(airflow.cfg) 및 사용자 설정 파일(Access key 등) 위치 디렉토리
+    - plugins: 모듈화 된 파이프라인 코드들 저장 디렉토리 
+    - .env: airflow 인프라를 위한 값들이 KEY-VALUE 형태로 정의하는 파일
+
+
+## Airflow 3 서비스 구성
+
+> 아래 필수 여부는 강의의 CeleryExecutor 구성 기준이다.
+
+| 서비스 | 역할 | 필수 여부 |
+|---|---|:---:|
+| `airflow-init` | Airflow 초기 설정 및 메타데이터 DB 초기화 수행 | ✅ |
+| `postgres` | Airflow의 메타데이터, 작업 상태, 변수 등을 저장·관리 | ✅ |
+| `redis` | CeleryExecutor에서 작업 대기열의 메시지를 전달하는 브로커 역할 | ✅ |
+| `airflow-apiserver` | 웹 인터페이스(UI) 및 API 제공 | ✅ |
+| `dag-processor` | DAG 파일을 주기적으로 읽어 관련 정보를 저장·최신화 | ✅ |
+| `airflow-scheduler` | 실행 조건과 의존성을 확인해 Task 실행을 예약 | ✅ |
+| `airflow-worker` | 실제 Task를 실행하고 결과 처리 | ✅ |
+| `airflow-triggerer` | 지연 실행된 Task의 비동기 대기 처리 담당 (Deferrable Sensor 등) | ✅ |
+| `flower` | Celery 워커 상태를 모니터링하는 웹 UI 제공 | ❌ |
+
+> `airflow-init`은 초기화 후 종료되는 서비스다.
+> Redis·Celery 워커는 Executor 선택에 따라, Triggerer는 지연 실행 기능 사용 여부에 따라 필요성이 달라진다.
+
+
+## Airflow 실행 흐름
+
+> CeleryExecutor 구성 기준의 간략한 흐름
+
+```mermaid
+flowchart TD
+    A["DAG 파일 작성"] --> B["DAG Processor<br/>파일 해석"]
+    B --> C[("메타데이터 DB<br/>DAG 정보·실행 상태")]
+    C --> D["Scheduler<br/>실행할 작업 결정"]
+    D --> E["Redis<br/>작업 대기열"]
+    E --> F["Worker<br/>실제 작업 실행"]
+
+    F -->|"API를 통해 상태 반영"| G["API Server"]
+    G --> C
+    C --> G
+    G --> H["Airflow UI<br/>실행 상태 확인"]
+```
+
+- **DAG Processor**: DAG 파일을 읽어 작업 구조를 등록한다.
+- **Scheduler**: 실행 시점과 작업 의존성을 확인한다.
+- **Redis**: 실행할 작업의 메시지를 전달한다.
+- **Worker**: Python·SQL 등의 실제 작업을 실행한다.
+- **메타데이터 DB**: DAG 정보와 실행 상태를 저장한다.
+- **API Server / UI**: 정보 조회와 작업 상태 확인을 제공한다.
+
+> Triggerer는 비동기 대기가 필요한 작업을 담당하고,
+> Flower는 Celery 워커 모니터링에 사용한다.
+> 로그 저장 위치는 별도 설정에 따라 달라진다.
