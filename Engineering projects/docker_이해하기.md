@@ -39,7 +39,7 @@
 | `airflow-init` | Airflow 초기 설정 및 메타데이터 DB 초기화 수행 | ✅ |
 | `airflow-cli` | Airflow 명령어를 실행하기 위한 임시 컨테이너 | ❌ |
 | `flower` | Celery 워커 상태를 모니터링하는 웹 UI 서비스 | ❌ |
-
+ 
 > `airflow-init`은 초기화 후 종료된다.
 > Redis와 Celery 워커는 Executor 선택에 따라 필요성이 달라진다.
 > Triggerer는 지연 실행 기능을 사용하는 경우 필요하다.
